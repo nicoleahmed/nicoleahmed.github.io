@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Page</title>
+  </head>
+  <body>
+    <h1>Search Links for Artist and Track</h1>
+    <input type="text" id="artist" placeholder="Enter artist name...">
+    <input type="text" id="track" placeholder="Enter track name...">
+    <button onclick="getLinks()">Get Links</button>
+
+    <div id="links"></div>
+
+    <script>
+      function getLinks() {
+        var artist = document.getElementById("artist").value;
+        var track = document.getElementById("track").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var data = JSON.parse(this.responseText);
+            var links = filterLinks(data);
+            showLinks(links);
+          }
+        };
+        xhttp.open("GET", "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=your_api_key_here&artist=" + artist + "&track=" + track + "&format=json", true);
+        xhttp.send();
+      }
+
+      function filterLinks(data) {
+        var links = {'spotify': null, 'apple': null, 'youtube': null};
+        var externalIds = data.track.externalids.externalid;
+        if (externalIds) {
+          for (var i = 0; i < externalIds.length; i++) {
+            var link = externalIds[i];
+            if (link.source.includes('spotify')) {
+              links.spotify = link['#text'];
+            } else if (
